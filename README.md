@@ -32,5 +32,3 @@ Desenvolvido como parte da atividade prática da disciplina, com foco em **facil
    git remote add origin https://github.com/baaabiolivs/PythonProjectCoffeShop.git
 git branch -M principal
 git push -u origin principal
-
-
