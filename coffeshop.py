@@ -1,20 +1,24 @@
-# Coffee Shops Tia Rosa - Sistema Básico
+# Coffee Shops Tia Rosa - Sistema Simples
 # Autor: Bárbara
 # Sistema simples em Python com menu de opções
 # Usando listas e dicionários para guardar dados
+# Observação: foquei em lógica/estruturas, por isso usei interface em linha de comando.
+produtos = []      # {"nome": "Cappuccino", "preco": 12.5, "ingredientes": ["café", "leite", "açúcar"]}
+clientes = []      # {"nome": "Ana", "telefone": "61..."}
+pedidos = []       # {"cliente": "Ana", "itens": [{"produto": "Cappuccino", "qtd": 2}], "total": 25.0}
 
-# Lista com produtos de exemplo
+# Lista com produtos
 produtos = [
-    {"nome": "Cappuccino", "preco": 12.50, "ingredientes": "Café, leite, açúcar"},
+    {"nome": "Cappuccino", "preco": 12.50, "ingredientes": "Café, leite vaporizado, açúcar, canela"},
     {"nome": "Pão de Queijo", "preco": 5.00, "ingredientes": "Queijo, polvilho"},
-    {"nome": "Bolo de Cenoura", "preco": 8.00, "ingredientes": "Cenoura, farinha, chocolate"}
+    {"nome": "Bolo de Cenoura", "preco": 8.00, "ingredientes": "Cenoura, farinha, açúcar, chocolate"}
 ]
 
-# Lista com clientes de exemplo
+# Lista com clientes
 clientes = [
-    {"nome": "Maria Silva", "telefone": "61 99999-1111"},
-    {"nome": "João Pereira", "telefone": "61 98888-2222"},
-    {"nome": "Ana Souza", "telefone": "61 97777-3333"}
+    {"nome": "Pedro Guilherme", "telefone": "61 99273-1111"},
+    {"nome": "Nícolas Santos", "telefone": "61 99664-6765"},
+    {"nome": "Ana Souza", "telefone": "61 98408-9000"}
 ]
 
 # Lista para pedidos
@@ -64,10 +68,17 @@ def listar_clientes():
             print(f"{i}. {c['nome']} - Tel: {c['telefone']}")
 
 
+
 # ----------- FUNÇÕES DE PEDIDOS -----------
 
 def registrar_pedido():
+    """
+    Registra um pedido com múltiplos itens.
+    Enquanto não digitar 0, dá pra ir adicionando produtos.
+    """
     print("\n--- Registrar Pedido ---")
+
+    # checagens básicas
     if not clientes:
         print("⚠ Nenhum cliente cadastrado! Cadastre antes de fazer um pedido.")
         return
@@ -75,29 +86,58 @@ def registrar_pedido():
         print("⚠ Nenhum produto cadastrado! Cadastre antes de fazer um pedido.")
         return
 
+    # escolher cliente
     listar_clientes()
-    cliente_id = int(input("Escolha o número do cliente: ")) - 1
-    cliente = clientes[cliente_id]
+    try:
+        cliente_id = int(input("Escolha o número do cliente: ").strip()) - 1
+        cliente = clientes[cliente_id]
+    except (ValueError, IndexError):
+        print("Cliente inválido.")
+        return
 
-    listar_produtos()
-    produto_id = int(input("Escolha o número do produto: ")) - 1
-    produto = produtos[produto_id]
+    itens = []
+    total = 0.0
 
-    pedido = {"cliente": cliente["nome"], "produto": produto["nome"], "valor": produto["preco"]}
-    pedidos.append(pedido)
-    print(f"✅ Pedido registrado: {cliente['nome']} pediu {produto['nome']}.")
+    # loop para adicionar vários itens
+    while True:
+        print("\n--- Produtos ---")
+        for i, p in enumerate(produtos, start=1):
+            print(f"{i}. {p['nome']} - R$ {p['preco']:.2f}")
 
+        escolha = input("Produto (número) — 0 para finalizar: ").strip()
+        try:
+            idx = int(escolha)
+        except ValueError:
+            print("Digite um número válido.")
+            continue
 
-def listar_pedidos():
-    print("\n--- Lista de Pedidos ---")
-    if not pedidos:
-        print("Nenhum pedido registrado.")
-    else:
-        total = 0
-        for i, p in enumerate(pedidos, start=1):
-            print(f"{i}. Cliente: {p['cliente']} | Produto: {p['produto']} | Valor: R${p['valor']:.2f}")
-            total += p['valor']
-        print(f"💰 Total em vendas: R${total:.2f}")
+        if idx == 0:
+            break
+        if not (1 <= idx <= len(produtos)):
+            print("Produto inválido.")
+            continue
+
+        try:
+            qtd = int(input("Quantidade: ").strip())
+            if qtd <= 0:
+                print("Quantidade deve ser positiva.")
+                continue
+        except ValueError:
+            print("Quantidade inválida.")
+            continue
+
+        prod = produtos[idx - 1]
+        itens.append({"produto": prod["nome"], "qtd": qtd, "preco": prod["preco"]})
+        total += prod["preco"] * qtd
+        print(f"✔ Adicionado: {qtd}x {prod['nome']}")
+
+    if not itens:
+        print("Pedido vazio, operação cancelada.")
+        return
+
+    pedidos.append({"cliente": cliente['nome'], "itens": itens, "total": total})
+    print(f"✅ Pedido registrado para {cliente['nome']}! Total: R$ {total:.2f}")
+
 
 
 # ----------- MENU PRINCIPAL -----------
